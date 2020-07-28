@@ -1,0 +1,26 @@
+{
+  "role_name": "role",
+  "_author": "Jonathan Scherrer",
+  "_github_user": "joscherrer",
+  "_organization": "jonsible",
+  "description": "Role to install {{ cookiecutter.role_name }}",
+  "_min_ansible_version": "2.3",
+  "platforms": {
+    "EL": [
+      "7"
+    ],
+    "Debian": [
+      "buster"
+    ],
+    "Ubuntu": [
+      "bionic"
+    ],
+    "Archlinux": [
+      "any"
+    ]
+  },
+  "galaxy_tags": {},
+  "dependencies": {},
+  "_year": "2020",
+  "_version" : "0.1.0"
+}

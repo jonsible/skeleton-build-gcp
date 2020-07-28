@@ -1,0 +1,13 @@
+---
+- name: Uninstalling {{ cookiecutter.role_name }}
+  become: true
+  become_user: "{{'{{'}} item.key {{'}}'}}"
+  make:
+    target: uninstall
+    chdir: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}/"
+
+- name: Removing source folder
+  become: true
+  file:
+    path: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}/"
+    state: absent

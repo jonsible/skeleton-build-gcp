@@ -1,0 +1,32 @@
+---
+galaxy_info:
+  role_name: {{ cookiecutter.role_name }}
+  author: {{ cookiecutter._author }}
+  description: |
+    {{ cookiecutter.description }}
+
+  license: GPL-3.0-or-later
+
+  min_ansible_version: {{ cookiecutter._min_ansible_version }}
+
+  platforms:
+    {%- for os, versions in cookiecutter.platforms|dictsort %}
+    - name: {{ os }}
+      versions:
+        {%- for version in versions %}
+        - {{ version }}
+        {%- endfor %}
+    {%- endfor %}
+
+  galaxy_tags:
+  {%- for tag in cookiecutter.galaxy_tags %}
+    - {{ tag }}
+  {%- else %} []
+  {%- endfor %}
+
+  dependencies:
+  {%- for dependency in cookiecutter.dependencies %}
+    - {{ dependency }}
+  {%- endfor %}
+    - role: jonsible.ulist
+    - role: jonsible.filter_plugins

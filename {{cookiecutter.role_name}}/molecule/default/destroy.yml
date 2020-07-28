@@ -1,0 +1,54 @@
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: "{{ molecule_no_log }}"
+  tasks:
+    - name: Destroy molecule instance(s)
+      gcp_compute_instance:
+        name: "{{ item.name }}"
+        machine_type: "{{ item.machine_type }}"
+        zone: "{{ item.zone }}"
+        disks:
+          - auto_delete: true
+            boot: true
+            initialize_params:
+              disk_size_gb: 10
+              source_image: projects/{{ item.image_project }}/global/images/family/{{ item.image_family }}
+        network_interfaces:
+          - network:
+              name: default
+            access_configs:
+              - name: 'External NAT'
+                nat_ip:
+                  name: '{{ item.name }}-ip'
+                type: 'ONE_TO_ONE_NAT'
+        scheduling:
+          preemptible: true
+        project: "{{ lookup('env', 'GCE_PROJECT_ID') }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ lookup('env', 'GCE_CREDENTIALS_FILE') }}"
+        state: absent
+      register: server
+      with_items: "{{ molecule_yml.platforms }}"
+      async: 7200
+      poll: 0
+
+    - name: Wait for instance(s) deletion to complete
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+      register: gce_jobs
+      until: gce_jobs.finished
+      retries: 300
+      with_items: "{{ server.results }}"
+
+    - name: Populate instance config
+      set_fact:
+        instance_conf: {}
+
+    - name: Dump instance config
+      copy:
+        content: "{{ instance_conf | to_json | from_json | molecule_to_yaml | molecule_header }}"
+        dest: "{{ molecule_instance_config }}"
+      when: server.changed | bool  # noqa 503

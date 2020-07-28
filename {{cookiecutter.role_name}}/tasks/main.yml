@@ -1,0 +1,42 @@
+# yamllint disable rule:line-length
+---
+{% raw %}
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}-family.yml"
+
+- name: Include Distribution version specific variables
+  include_vars: "{{ ansible_distribution }}.yml"
+
+- name: Include tasks
+  include_tasks: "os_specific/{{ ansible_distribution }}.yml"
+
+- name: Include tasks
+  include_tasks: "os_specific/{{ ansible_os_family }}-family.yml"
+{% endraw %}
+- include_tasks: repo.yml
+  when: not {{ cookiecutter.role_name }}_install_from_source|bool
+
+- include_tasks: set_user_list.yml
+  when: >
+    {{ cookiecutter.role_name }}_user_config|bool or
+    {{ cookiecutter.role_name }}_user_install|bool
+
+- name: Installing config
+  include_tasks: config.yml
+
+- name: Setting user_list (global)
+  set_fact:
+    {{ cookiecutter.role_name }}_user_list:
+      root:
+        home: "{{'{{'}} {{ cookiecutter.role_name }}_prefix {{'}}'}}"
+        gid: 1000
+        uid: 1000
+        shell: /bin/bash
+  when:
+    - not {{ cookiecutter.role_name }}_user_install|bool
+    - {{ cookiecutter.role_name }}_install_from_source|bool
+
+- name: Install from source
+  include_tasks: source.yml
+  loop: "{{'{{'}} lookup('dict', {{ cookiecutter.role_name }}_user_list, wantlist=true) {{'}}'}}"
+  when: {{ cookiecutter.role_name }}_install_from_source|bool

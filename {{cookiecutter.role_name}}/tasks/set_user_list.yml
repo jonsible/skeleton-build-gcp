@@ -1,0 +1,29 @@
+---
+- name: Exiting if no user filter/strip provided
+  assert:
+    that: >
+      {{ cookiecutter.role_name }}_user_strip|length > 0 or
+      {{ cookiecutter.role_name }}_user_filter|length > 0
+
+- name: Getting ulist
+  include_role:
+    name: jonsible.ulist
+    tasks_from: set_ulist.yml
+  when: {{ cookiecutter.role_name }}_user_list|length == 0
+
+- name: Setting ulist if {{ cookiecutter.role_name }}_user_list is set
+  set_fact:
+    ulist: "{{'{{'}} {{ cookiecutter.role_name }}_user_list {{'}}'}}"
+  when: {{ cookiecutter.role_name }}_user_list|length != 0
+
+- name: Processing ulist
+  include_role:
+    name: jonsible.ulist
+    tasks_from: process_ulist.yml
+  vars:
+    filter: "{{'{{'}} {{ cookiecutter.role_name }}_user_filter {{'}}'}}"
+    strip: "{{'{{'}} {{ cookiecutter.role_name }}_user_strip {{'}}'}}"
+
+- name: Setting user_list
+  set_fact:
+    {{ cookiecutter.role_name }}_user_list: "{{'{{'}} ulist {{'}}'}}"

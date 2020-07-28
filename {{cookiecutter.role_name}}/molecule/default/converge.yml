@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    xrdp_skel_config: true
+  tasks:
+    - include_role:
+        name: xrdp

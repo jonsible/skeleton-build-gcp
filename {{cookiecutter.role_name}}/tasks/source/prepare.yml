@@ -1,0 +1,58 @@
+---
+- name: Getting latest {{ cookiecutter.role_name }} version
+  shell: | # noqa 303
+    set -o pipefail
+    {{'{{'}} {{ cookiecutter.role_name }}_git_version_cmd {{'}}'}}
+  args:
+    executable: /bin/bash
+  register: {{ cookiecutter.role_name }}_git
+  changed_when: false
+
+- name: Setting prefix (user)
+  set_fact:
+    prefix: "{{'{{'}} item.value['home'] {{'}}'}}/.local"
+  when: {{ cookiecutter.role_name }}_user_install|bool
+
+- name: Setting source_path (user)
+  set_fact:
+    source_path: "{{'{{'}} item.value['home'] {{'}}'}}/.local/src"
+  when: {{ cookiecutter.role_name }}_user_install|bool
+
+- name: Setting prefix (global)
+  set_fact:
+    prefix: "{{'{{'}} item.value['home'] {{'}}'}}"
+  when: not {{ cookiecutter.role_name }}_user_install|bool
+
+- name: Setting source_path (global)
+  set_fact:
+    source_path: "{{'{{'}} {{ cookiecutter.role_name }}_source_path {{'}}'}}"
+  when: not {{ cookiecutter.role_name }}_user_install|bool
+
+- name: Checking if {{ cookiecutter.role_name }} is installed
+  stat:
+    path: "{{'{{'}} prefix {{'}}'}}/bin/{{'{{'}} {{ cookiecutter.role_name }}_bin_name {{'}}'}}"
+  register: {{ cookiecutter.role_name }}_installed
+
+- name: Getting current {{ cookiecutter.role_name }} version
+  shell: |
+    set -o pipefail
+    {{'{{'}} {{ cookiecutter.role_name }}_local_version_cmd {{'}}'}}
+  args:
+    executable: /bin/bash
+  when: {{ cookiecutter.role_name }}_installed.stat.exists
+  register: {{ cookiecutter.role_name }}_local
+  changed_when: false
+
+- name: Set forced version
+  set_fact:
+    {{ cookiecutter.role_name }}_git_version: "{{'{{'}} {{ cookiecutter.role_name }}_version {{'}}'}}"
+
+- name: Set latest {{ cookiecutter.role_name }} version
+  set_fact:
+    {{ cookiecutter.role_name }}_git_version: "{{'{{'}} {{ cookiecutter.role_name }}_git.stdout {{'}}'}}"
+  when: not {{ cookiecutter.role_name }}_git_version
+
+- name: Set local {{ cookiecutter.role_name }} version
+  set_fact:
+    {{ cookiecutter.role_name }}_local_version: "{{'{{'}} {{ cookiecutter.role_name }}_local.stdout {{'}}'}}"
+  when: {{ cookiecutter.role_name }}_installed.stat.exists

@@ -1,0 +1,15 @@
+---
+- include_tasks: source/prepare.yml
+
+- include_tasks: source/uninstall.yml
+  when:
+    - {{ cookiecutter.role_name }}_installed.stat.exists
+    - >
+      ({{ cookiecutter.role_name }}_git_version != {{ cookiecutter.role_name }}_local_version) or
+      {{ cookiecutter.role_name }}_force_install|bool
+
+- include_tasks: source/install.yml
+  when: >
+    not {{ cookiecutter.role_name }}_installed.stat.exists or
+    {{ cookiecutter.role_name }}_force_install|bool or
+    ({{ cookiecutter.role_name }}_git_version != {{ cookiecutter.role_name }}_local_version)

@@ -1,0 +1,22 @@
+# yamllint disable rule:line-length
+---
+# Has global alternative
+{{ cookiecutter.role_name }}_source_path: "{{'{{'}} global_source_path | default('/opt') {{'}}'}}"
+{{ cookiecutter.role_name }}_prefix: "{{'{{'}} global_prefix | default('/usr/local') {{'}}'}}"
+{{ cookiecutter.role_name }}_user_install: "{{'{{'}} global_user_install | default(false) {{'}}'}}"
+{{ cookiecutter.role_name }}_user_config: "{{'{{'}}_global_user_config | default(false) {{'}}'}}"
+{{ cookiecutter.role_name }}_skel_config: "{{'{{'}} global_skel_config | default(false) {{'}}'}}"
+{{ cookiecutter.role_name }}_install_from_source: "{{'{{'}} global_install_from_source | default(false) {{'}}'}}"
+{{ cookiecutter.role_name }}_force_install: "{{'{{'}} global_force_install | default(false) {{'}}'}}"
+{{ cookiecutter.role_name }}_user_strip: "{{'{{'}} global_user_strip | default([]) {{'}}'}}"
+{{ cookiecutter.role_name }}_user_filter: "{{'{{'}} global_user_filter | default([]){{'}}'}}"
+{{ cookiecutter.role_name }}_version: "2.9"
+
+# Shouldn't be changed
+{{ cookiecutter.role_name }}_bin_name: "{{ cookiecutter.role_name }}"
+{{ cookiecutter.role_name }}_user_list: "{{'{{'}} global_user_list | default({}) {{'}}'}}"
+{{ cookiecutter.role_name }}_git_version_cmd: git ls-remote --tags https://github.com/tmux/tmux.git | sed 's/.*\///' | egrep -o "[0-9]*(\.[0-9]*)(\.[0-9]*)?$" | sort -V | tail -n1
+{{ cookiecutter.role_name }}_local_version_cmd: |
+  {{'{{'}} prefix {{'}}'}}/bin/{{'{{'}} {{ cookiecutter.role_name }}_bin_name {{'}}'}} -V | egrep -o "[0-9]*(\.[0-9]*)(\.[0-9]*)?([a-z])?"
+
+{{ cookiecutter.role_name }}_source_url: "https://github.com/tmux/tmux/releases/download/{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}.tar.gz"

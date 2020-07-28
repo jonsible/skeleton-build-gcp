@@ -1,0 +1,7 @@
+---
+- name: Installing {{ cookiecutter.role_name }}
+  become: true
+  package:
+    name: {{ cookiecutter.role_name }}
+    state: present
+    update_cache: true

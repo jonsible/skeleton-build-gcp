@@ -1,0 +1,41 @@
+---
+- name: Creating skel config
+  become: true
+  copy:
+    src: files/.tmux.conf
+    dest: /etc/skel/.tmux.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: {{ cookiecutter.role_name }}_skel_config|bool
+
+- name: User .local pathmunge
+  become: true
+  copy:
+    content: |
+      #!/bin/sh
+      pathmunge $HOME/.local/bin
+    dest: /etc/profile.d/userpath.sh
+    mode: 0755
+
+- name: Creating user config directory
+  become: true
+  become_user: "{{'{{'}} item.key {{'}}'}}"
+  file:
+    path: "{{'{{'}} item.value['home'] {{'}}'}}/.config/tmux/"
+    mode: 0700
+    owner: "{{'{{'}} item.key {{'}}'}}"
+    state: directory
+  loop: "{{'{{'}} lookup('dict', {{ cookiecutter.role_name }}_user_list, wantlist=true) {{'}}'}}"
+  when: {{ cookiecutter.role_name }}_user_config|bool
+
+- name: Installing user config
+  become: true
+  copy:
+    src: files/.tmux.conf
+    dest: "{{'{{'}} item.value['home'] {{'}}'}}/.tmux.conf"
+    owner: "{{'{{'}} item.key {{'}}'}}"
+    mode: 0600
+    attr: +i
+  loop: "{{'{{'}} lookup('dict', {{ cookiecutter.role_name }}_user_list, wantlist=true) {{'}}'}}"
+  when: {{ cookiecutter.role_name }}_user_config|bool

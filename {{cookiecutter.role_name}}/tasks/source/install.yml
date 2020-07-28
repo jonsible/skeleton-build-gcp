@@ -1,0 +1,38 @@
+---
+- name: Creating {{ cookiecutter.role_name }} versioned directory
+  become: true
+  file:
+    path: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}/"
+    state: directory
+    mode: 0755
+
+- name: Downloading the latest version of {{ cookiecutter.role_name }}
+  become: true
+  unarchive:
+    src: "{{'{{'}} {{ cookiecutter.role_name }}_source_url {{'}}'}}"
+    dest: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}/"
+    extra_opts:
+      - --strip-components=1
+    remote_src: true
+
+- name: Configuring {{ cookiecutter.role_name }}
+  become: true
+  shell: |
+    ./configure --prefix="{{'{{'}} prefix {{'}}'}}"
+  changed_when: false
+  args:
+    chdir: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}/"
+
+- name: Making {{ cookiecutter.role_name }}
+  become: true
+  make:
+    chdir: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}"
+
+- name: Installing {{ cookiecutter.role_name }}
+  become: true
+  changed_when: false
+  make:
+    chdir: "{{'{{'}} source_path {{'}}'}}/{{ cookiecutter.role_name }}-{{'{{'}} {{ cookiecutter.role_name }}_git_version {{'}}'}}"
+    target: install
+    params:
+      PREFIX: "{{'{{'}} prefix {{'}}'}}"
